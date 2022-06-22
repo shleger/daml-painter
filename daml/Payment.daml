@@ -1,3 +1,20 @@
 module Payment where
 
+template BankAccount 
+    with
+        owner: Party
+        ownerName: Text
+        accIssuer: Party
+        accNumber: Int
+        accName: Text
+        accBalance: Decimal
+    where
+        signatory accIssuer
+        observer owner        
+
+    
+      
+
+
+
 

@@ -1,6 +1,7 @@
 module Deal where
 
 import Daml.Script
+import Payment
 
 
 template PaintOffer 
@@ -10,20 +11,21 @@ template PaintOffer
         address: Text
         cost: Decimal
     where
-    signatory painter
-    observer customer
+        signatory painter
+        observer customer
 
-    choice Accept : ContractId PaintAgree
-        with
-            newCustomer: Party
-            paintOfferId: ContractId PaintOffer
+        choice Accept : ContractId PaintAgree
+            with
+                newCustomer: Party
+                paintOfferId: ContractId PaintOffer
 
-        controller customer
-        do create PaintAgree 
-            with 
-                customer = newCustomer
-                painter 
-                paintOfferId
+            controller customer
+            do create PaintAgree 
+                with 
+                    customer = newCustomer
+                    painter 
+                    paintOfferId
+                
 
 
 template PaintAgree 
@@ -40,8 +42,20 @@ template PaintAgree
 
 painting: Script ()
 painting = script do
-    alice <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
-    den <- allocatePartyWithHint "Den" (PartyIdHint "Den")
+    alice   <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
+    den     <- allocatePartyWithHint "Den" (PartyIdHint "Den")
+    banker  <- allocatePartyWithHint "Bank" (PartyIdHint "Bank")
+
+    cidAcc <- submit banker do
+            createCmd BankAccount with
+                accBalance = 1000.00
+                accIssuer = banker
+                accNumber = 12345
+                accName = "Alice's account"
+                owner = alice
+                ownerName = "Alice Wander"
+
+
 
     cidPO <- submit den do
             createCmd PaintOffer with
