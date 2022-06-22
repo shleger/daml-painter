@@ -6,17 +6,35 @@ import Daml.Script
 template PaintOffer 
     with
         painter : Party
-        customer: Optional Party
+        customer: Party
         address: Text
+        cost: Decimal
     where
     signatory painter
     observer customer
 
-    choice Accept : ContractId PaintOffer
+    choice Accept : ContractId PaintAgree
         with
-            newPainter: Party
-        controller painter
-        do create this with painter = newPainter
+            newCustomer: Party
+            paintOfferId: ContractId PaintOffer
+
+        controller customer
+        do create PaintAgree 
+            with 
+                customer = newCustomer
+                painter 
+                paintOfferId
+
+
+template PaintAgree 
+    with
+        painter: Party
+        customer: Party
+        paintOfferId: ContractId PaintOffer
+    where
+        signatory customer
+        observer painter
+
 
 
 
@@ -25,11 +43,21 @@ painting = script do
     alice <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
     den <- allocatePartyWithHint "Den" (PartyIdHint "Den")
 
-    submit den do
-        createCmd PaintOffer with
-         customer = None
-         painter = den
-         address = "New Street 15"
+    cidPO <- submit den do
+            createCmd PaintOffer with
+                customer = alice
+                painter = den
+                address = "New Street 15"
+                cost = 10.0
+    
+
+
+    cidPA <- submit alice do
+            exerciseCmd cidPO Accept with
+                newCustomer = alice
+                paintOfferId = cidPO
+
+
 
     return ()     
 
