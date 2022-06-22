@@ -20,12 +20,16 @@ template PaintOffer
                 paintOfferId: ContractId PaintOffer
 
             controller customer
-            do create PaintAgree 
-                with 
-                    customer = newCustomer
-                    painter 
-                    paintOfferId
+            do 
+                pa <- create PaintAgree 
+                    with 
+                        customer = newCustomer
+                        painter 
+                        paintOfferId
+                -- pa.customer        
+                pure pa
                 
+                    
 
 
 template PaintAgree 

@@ -1,5 +1,17 @@
 module Payment where
 
+template BankTransaction
+  with
+    from : Party
+    to: Party
+    amount: Decimal
+    -- credit | debit account??
+
+  where
+    signatory from
+    observer to
+    
+
 template BankAccount 
     with
         owner: Party
@@ -10,7 +22,19 @@ template BankAccount
         accBalance: Decimal
     where
         signatory accIssuer
-        observer owner        
+        observer owner    
+
+        choice Transfer : ContractId BankTransaction
+            with
+                cost: Decimal
+                creditTo: Party   
+            controller owner    
+            do 
+                create BankTransaction with
+                    from = owner
+                    to=creditTo
+                    amount = accBalance - cost
+                
 
     
       
