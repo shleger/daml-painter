@@ -20,6 +20,10 @@ template Asset
       do create this with
            owner = newOwner
 
+-- template PaintAgree 
+--   with
+
+
 setup : Script AssetId
 setup = script do
 -- user_setup_begin

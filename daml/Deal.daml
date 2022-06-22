@@ -1,2 +1,46 @@
 module Deal where
 
+import Daml.Script
+
+
+template PaintOffer 
+    with
+        painter : Party
+        customer: Optional Party
+        address: Text
+    where
+    signatory painter
+    observer customer
+
+    choice Accept : ContractId PaintOffer
+        with
+            newPainter: Party
+        controller painter
+        do create this with painter = newPainter
+
+
+
+painting: Script ()
+painting = script do
+    alice <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
+    den <- allocatePartyWithHint "Den" (PartyIdHint "Den")
+
+    submit den do
+        createCmd PaintOffer with
+         customer = None
+         painter = den
+         address = "New Street 15"
+
+    return ()     
+
+    
+
+
+
+
+
+
+
+
+
+
