@@ -18,6 +18,7 @@ template PaintOffer
             with
                 newCustomer: Party
                 paintOfferId: ContractId PaintOffer
+                customerAccCid: ContractId BankAccount
 
             controller customer
             do 
@@ -26,7 +27,13 @@ template PaintOffer
                         customer = newCustomer
                         painter 
                         paintOfferId
-                -- pa.customer        
+                -- pa.customer   
+                -- exercise paintOfferId Transfer   
+                -- poId <- fetch  paintOfferId
+                debug $ "ddd: "  <>  show (cost)
+                -- exercise customerAccCid Transfer with
+                --     cost
+                --     creditTo = painter
                 pure pa
                 
                     
@@ -50,7 +57,7 @@ painting = script do
     den     <- allocatePartyWithHint "Den" (PartyIdHint "Den")
     banker  <- allocatePartyWithHint "Bank" (PartyIdHint "Bank")
 
-    cidAcc <- submit banker do
+    cidAlice <- submit banker do
             createCmd BankAccount with
                 accBalance = 1000.00
                 accIssuer = banker
@@ -58,6 +65,16 @@ painting = script do
                 accName = "Alice's account"
                 owner = alice
                 ownerName = "Alice Wander"
+
+    cidDen <- submit banker do
+            createCmd BankAccount with
+                accBalance = 0.00
+                accIssuer = banker
+                accNumber = 67890
+                accName = "Den's account"
+                owner = alice
+                ownerName = "Den Draw"
+
 
 
 
@@ -74,6 +91,7 @@ painting = script do
             exerciseCmd cidPO Accept with
                 newCustomer = alice
                 paintOfferId = cidPO
+                customerAccCid = cidAlice
 
 
 

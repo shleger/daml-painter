@@ -1,15 +1,16 @@
 module Payment where
 
+import  Daml.Script
+
 template BankTransaction
   with
-    from : Party
-    to: Party
+    sender : Party
+    receiver: Party
+    receiverAcc:ContractId BankAccount 
     amount: Decimal
-    -- credit | debit account??
-
   where
-    signatory from
-    observer to
+    signatory sender
+    observer  receiver
     
 
 template BankAccount 
@@ -27,16 +28,55 @@ template BankAccount
         choice Transfer : ContractId BankTransaction
             with
                 cost: Decimal
-                creditTo: Party   
+                to: Party  
+                from: Party 
+                receiverAcc: ContractId BankAccount
             controller owner    
             do 
                 create BankTransaction with
-                    from = owner
-                    to=creditTo
+                    sender = to
+                    receiver=from
                     amount = accBalance - cost
+                    receiverAcc
+                    
+
                 
 
-    
+sending = script do
+    alice   <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
+    den     <- allocatePartyWithHint "Den" (PartyIdHint "Den")
+    banker  <- allocatePartyWithHint "Bank" (PartyIdHint "Bank")
+
+    cidAlice <- submit banker do
+            createCmd BankAccount with
+                accBalance = 1000.00
+                accIssuer = banker
+                accNumber = 12345
+                accName = "Alice's account"
+                owner = alice
+                ownerName = "Alice Wander"
+
+
+    cidDen <- submit banker do
+            createCmd BankAccount with
+                accBalance = 0.00
+                accIssuer = banker
+                accNumber = 67890
+                accName = "Den's account"
+                owner = alice
+                ownerName = "Den Draw"
+
+    -- submit banker do
+    --     exerciseCmd cidAlice Transfer with
+    --         cost = 100.00
+    --         to = den
+    --         from = alice
+    --         receiverAcc = cidDen
+
+
+
+    pure ()
+      
       
 
 
