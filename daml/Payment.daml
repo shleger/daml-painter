@@ -22,7 +22,7 @@ template IouBank
             with
                 payAmount: Decimal
                 newOwner : Party
-            controller owner
+            controller owner, newOwner
             do
               credit <- create this with balance = balance - payAmount
               debit  <- create this with balance = payAmount; owner = newOwner

@@ -34,8 +34,6 @@ template PaintOffer
                     payAmount = cost
                     newOwner = painter
                 pure pa
-                
-                    
 
 
 template PaintAgree 
@@ -65,14 +63,11 @@ iouPainting = script do
                 address = "New Street 15"
                 cost = 10.0
 
--- TODO fix:
-    -- cidPA <- submit alice do
-    --         exerciseCmd cidPO Accept with
-    --             newCustomer = den 
-    --             paintOfferId = cidPO
-    --             iouCid = iouId                
-
-
+    cidPA <- submit alice do
+            exerciseCmd cidPO Accept with
+                newCustomer = alice 
+                paintOfferId = cidPO
+                iouCid = iouId                
 
 
     pure ()
