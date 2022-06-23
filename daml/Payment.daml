@@ -2,6 +2,56 @@ module Payment where
 
 import  Daml.Script
 
+
+data PayResult = PayResult with
+  debit : ContractId IouBank  --debit entry always adds a positive number or receive money
+  credit : ContractId IouBank --credit entry always adds a negative number or send money
+    deriving (Eq, Show)
+
+template IouBank 
+    with
+        issuer: Party
+        owner: Party
+        balance: Decimal
+        
+    where
+        signatory issuer, owner
+        
+
+        choice IouBank_Transfer : PayResult
+            with
+                payAmount: Decimal
+                newOwner : Party
+            controller owner
+            do
+              credit <- create this with balance = balance - payAmount
+              debit  <- create this with balance = balance + payAmount; owner = newOwner
+              return PayResult with credit; debit
+
+
+iouPay = script do
+    (alice,den,banker) <- roles
+
+    iouId <- submitMulti [banker,alice] [] do
+        createCmd IouBank with
+            issuer = banker
+            owner = alice
+            balance = 500.00
+
+    pr <- submit alice do 
+        exerciseCmd iouId IouBank_Transfer 
+            with 
+                payAmount = 200.00
+                newOwner = banker --TODO must be den !!
+            
+
+
+    return ()
+
+
+
+
+
 template BankTransaction
   with
     sender : Party
@@ -43,9 +93,10 @@ template BankAccount
                 
 
 sending = script do
-    alice   <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
-    den     <- allocatePartyWithHint "Den" (PartyIdHint "Den")
-    banker  <- allocatePartyWithHint "Bank" (PartyIdHint "Bank")
+
+    rolesTup@(alice,den,banker) <- roles
+
+    
 
     cidAlice <- submit banker do
             createCmd BankAccount with
@@ -73,9 +124,14 @@ sending = script do
     --         from = alice
     --         receiverAcc = cidDen
 
+    pure rolesTup
 
+roles = script do
+    alice   <- allocatePartyWithHint "Alice" (PartyIdHint "Alice")
+    den     <- allocatePartyWithHint "Den" (PartyIdHint "Den")
+    banker  <- allocatePartyWithHint "Bank" (PartyIdHint "Bank")
 
-    pure ()
+    pure (alice,den,banker)
       
       
 
