@@ -14,7 +14,7 @@ template PaintOffer
         signatory painter
         observer customer
 
-        choice Accept : ContractId PaintAgree
+        choice PaintOffer_Accept : ContractId PaintAgree
             with
                 newCustomer: Party
                 paintOfferId: ContractId PaintOffer
@@ -50,7 +50,7 @@ iouPainting = script do
 
     myRoles@(alice,den,banker) <- roles
 
-    iouId <- submitMulti [banker,alice] [] do
+    aliceIouCid <- submitMulti [banker,alice] [] do
         createCmd IouBank with
             issuer = banker
             owner = alice
@@ -64,10 +64,10 @@ iouPainting = script do
                 cost = 10.0
 
     cidPA <- submit alice do
-            exerciseCmd cidPO Accept with
+            exerciseCmd cidPO PaintOffer_Accept with
                 newCustomer = alice 
                 paintOfferId = cidPO
-                iouCid = iouId                
+                iouCid = aliceIouCid                
 
 
     pure ()

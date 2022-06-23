@@ -29,6 +29,7 @@ template IouBank
               return PayResult with credit; debit
 
 
+
 iouPay = script do
     myRoles@(alice,den,banker) <- roles
 
@@ -38,13 +39,11 @@ iouPay = script do
             owner = alice
             balance = 500.00
 
-    pr <- submit alice do 
+    pr <- submitMulti [den,alice] [] do 
         exerciseCmd iouId IouBank_Transfer 
             with 
                 payAmount = 200.00
-                newOwner = banker --TODO must be den !!
-            
-
+                newOwner = den
 
     return (myRoles, iouId)
 
