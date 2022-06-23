@@ -18,7 +18,7 @@ template PaintOffer
             with
                 newCustomer: Party
                 paintOfferId: ContractId PaintOffer
-                customerAccCid: ContractId BankAccount
+                iouCid: ContractId IouBank
 
             controller customer
             do 
@@ -27,13 +27,12 @@ template PaintOffer
                         customer = newCustomer
                         painter 
                         paintOfferId
-                -- pa.customer   
-                -- exercise paintOfferId Transfer   
-                -- poId <- fetch  paintOfferId
-                debug $ "ddd: "  <>  show (cost)
-                -- exercise customerAccCid Transfer with
-                --     cost
-                --     creditTo = painter
+
+                debug $ "Painting cost: "  <>  show (cost)
+
+                exercise iouCid IouBank_Transfer with
+                    payAmount = cost
+                    newOwner = painter
                 pure pa
                 
                     
@@ -48,6 +47,35 @@ template PaintAgree
         signatory customer
         observer painter
 
+
+iouPainting = script do
+
+    myRoles@(alice,den,banker) <- roles
+
+    iouId <- submitMulti [banker,alice] [] do
+        createCmd IouBank with
+            issuer = banker
+            owner = alice
+            balance = 500.00
+
+    cidPO <- submit den do
+            createCmd PaintOffer with
+                customer = alice
+                painter = den 
+                address = "New Street 15"
+                cost = 10.0
+
+-- TODO fix:
+    -- cidPA <- submit alice do
+    --         exerciseCmd cidPO Accept with
+    --             newCustomer = den 
+    --             paintOfferId = cidPO
+    --             iouCid = iouId                
+
+
+
+
+    pure ()
 
 
 
@@ -87,11 +115,11 @@ painting = script do
     
 
 
-    cidPA <- submit alice do
-            exerciseCmd cidPO Accept with
-                newCustomer = alice
-                paintOfferId = cidPO
-                customerAccCid = cidAlice
+    -- cidPA <- submit alice do
+    --         exerciseCmd cidPO Accept with
+    --             newCustomer = alice
+    --             paintOfferId = cidPO
+    --             customerAccCid = cidAlice
 
 
 

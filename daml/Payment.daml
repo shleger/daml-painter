@@ -25,12 +25,12 @@ template IouBank
             controller owner
             do
               credit <- create this with balance = balance - payAmount
-              debit  <- create this with balance = balance + payAmount; owner = newOwner
+              debit  <- create this with balance = payAmount; owner = newOwner
               return PayResult with credit; debit
 
 
 iouPay = script do
-    (alice,den,banker) <- roles
+    myRoles@(alice,den,banker) <- roles
 
     iouId <- submitMulti [banker,alice] [] do
         createCmd IouBank with
@@ -46,7 +46,7 @@ iouPay = script do
             
 
 
-    return ()
+    return (myRoles, iouId)
 
 
 
